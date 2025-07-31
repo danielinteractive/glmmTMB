@@ -21,6 +21,7 @@ mkTMBStruc(
   verbose = NULL,
   ziPredictCode = "corrected",
   doPredict = 0,
+  readWeights = 0L,
   whichPredict = integer(0),
   aggregate = factor(),
   REML = FALSE,
@@ -64,6 +65,8 @@ mkTMBStruc(
 \item{ziPredictCode}{zero-inflation code}
 
 \item{doPredict}{flag to enable sds of predictions}
+
+\item{readWeights}{flag to enable dynamic reading of weights from R environment (for sandwich estimate)}
 
 \item{whichPredict}{which observations in model frame represent predictions}
 
