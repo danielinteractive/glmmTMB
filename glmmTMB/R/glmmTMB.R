@@ -211,6 +211,7 @@ startParams <- function(parameters,
 ##' @param call original \code{glmmTMB} call
 ##' @param ziPredictCode zero-inflation code
 ##' @param doPredict flag to enable sds of predictions
+##' @param readWeights flag to enable dynamic reading of weights from R environment (for sandwich estimate)
 ##' @param whichPredict which observations in model frame represent predictions
 ##' @param sparseX see \code{\link{glmmTMB}}
 ##' @param old_smooths (optional) smooth components from a previous fit: used when constructing a new model structure for prediction
@@ -232,6 +233,7 @@ mkTMBStruc <- function(formula, ziformula, dispformula,
                        verbose=NULL,
                        ziPredictCode="corrected",
                        doPredict=0,
+                       readWeights=0L,
                        whichPredict=integer(0),
                        aggregate=factor(),
                        REML=FALSE,
@@ -427,6 +429,7 @@ mkTMBStruc <- function(formula, ziformula, dispformula,
     link = .valid_link[family$link],
     ziPredictCode = .valid_zipredictcode[ziPredictCode],
     doPredict = doPredict,
+    readWeights = readWeights,
     whichPredict = whichPredict,
     aggregate = aggregate
   )

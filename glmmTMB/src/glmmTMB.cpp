@@ -820,6 +820,16 @@ Type objective_function<Type>::operator() ()
   DATA_VECTOR(zioffset);
   DATA_VECTOR(dispoffset);
 
+  DATA_INTEGER(readWeights);
+  // 0 = do not dynamically read weights, 1 = read weights from environment
+  if (readWeights > 0) {
+    // This allows us to read weights dynamically from the R environment,
+    // and is useful in the robust sandwich estimator calculations.
+    // However we do not always enable this because this leads to slower performance,
+    // which would be a problem during model fitting / all other use cases.
+    DATA_UPDATE(weights);
+  }
+
   // Define covariance structure for the conditional model
   DATA_STRUCT(terms, terms_t);
 
