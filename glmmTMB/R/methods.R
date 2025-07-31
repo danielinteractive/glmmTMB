@@ -1865,6 +1865,11 @@ bread.glmmTMB <- function(x, full = FALSE, rawnames = FALSE, ...) {
 #'   this function should be used with models with a single level of random effects
 #'   or nested random effects only.
 #' 
+#' @details We only need to apply \code{\link[TMB]{retape}} twice: once at entry to 
+#'   enable dynamic weights reading, and once at exit to restore the original weights
+#'   and disable dynamic weights reading. This way, we can avoid retaping the \code{TMB} object
+#'   for each cluster, which would be slower.
+#' 
 #' @importFrom sandwich estfun
 #' @export
 #' @examples 
@@ -1874,7 +1879,7 @@ bread.glmmTMB <- function(x, full = FALSE, rawnames = FALSE, ...) {
 estfun.glmmTMB <- function(x, full = FALSE, cluster = nlme::getGroups(x), rawnames = FALSE, ...) {
     check_dots(..., .ignore = "complete")
 
-    stopifnot(!x$modelInfo$REML)
+    stopifnot(!isREML(x))
     stopifnot(is.logical(full) && length(full) == 1L)
     stopifnot(is.factor(cluster) && !any(is.na(cluster)) && length(cluster) == nobs(x))
     stopifnot(is.logical(rawnames) && length(rawnames) == 1L)
@@ -1892,9 +1897,16 @@ estfun.glmmTMB <- function(x, full = FALSE, cluster = nlme::getGroups(x), rawnam
     on.exit({
         # Reset the weights to the original values.
         x$obj$env$data$weights <- original_weights
+        # Disable dynamic weights reading.
+        x$obj$env$data$readWeights <- 0
         # Retape the TMB object to apply the changes.
         x$obj$retape(set.defaults = FALSE)
     })
+
+    # Enable dynamic weights reading.
+    x$obj$env$data$readWeights <- 1
+    # Retape the TMB object to apply the changes.
+    x$obj$retape(set.defaults = FALSE)
 
     # Obtain results across all clusters.
     cluster_results <- lapply(levels(cluster), function(this_cluster) {
@@ -1906,9 +1918,6 @@ estfun.glmmTMB <- function(x, full = FALSE, cluster = nlme::getGroups(x), rawnam
 
         # Modify the weights in the TMB object.
         x$obj$env$data$weights <- new_weights
-
-        # Retape the TMB object to apply the changes.
-        x$obj$retape(set.defaults = FALSE)
 
         # Compute the negative log-likelihood and the gradient for this cluster.
         neg_log_lik <- x$obj$fn(x$fit$par)

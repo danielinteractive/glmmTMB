@@ -11,7 +11,7 @@ nlevels(clusters)
 # so only 27 here.
 
 system.time(meat_res <- meatHC(owls_nb1))
-# takes about 2 seconds with retape() each time.
+# Took about 1 second with retape() each time.
 
 expected_res <- matrix(
     c(149.13, -186.32, 6.06, 41.7, -186.32, 1376.14, -105.8, 
